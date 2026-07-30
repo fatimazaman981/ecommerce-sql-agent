@@ -285,3 +285,6 @@ suite.
 
 Python · Flask · Groq API (Llama 3.3 70B) · MCP (Model Context Protocol) ·
 PostgreSQL · Supabase · HTML/CSS/JS
+
+## License
+This project is licensed under the MIT License.
