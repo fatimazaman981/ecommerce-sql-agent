@@ -1,0 +1,40 @@
+sources:
+  my-postgres-db:
+    kind: postgres
+    host: aws-1-ap-south-1.pooler.supabase.com
+    port: 5432
+    database: postgres
+    user: postgres.zsuogagasfdlvdsbxkxv
+    password: ${DB_PASSWORD}
+
+tools:
+  list-tables:
+    kind: postgres-sql
+    source: my-postgres-db
+    description: Lists all tables in the database
+    statement: |
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public';
+
+  list-relationships:
+    kind: postgres-sql
+    source: my-postgres-db
+    description: Lists foreign key relationships between tables
+    statement: |
+      SELECT
+        tc.table_name AS table_name,
+        kcu.column_name AS column_name,
+        ccu.table_name AS foreign_table_name,
+        ccu.column_name AS foreign_column_name
+      FROM information_schema.table_constraints AS tc
+      JOIN information_schema.key_column_usage AS kcu
+        ON tc.constraint_name = kcu.constraint_name
+      JOIN information_schema.constraint_column_usage AS ccu
+        ON ccu.constraint_name = tc.constraint_name
+      WHERE tc.constraint_type = 'FOREIGN KEY';
+
+  execute-sql:
+    kind: postgres-execute-sql
+    source: my-postgres-db
+    description: Executes a raw SQL query against the database
