@@ -1,29 +1,48 @@
-"""Flask HTTP API wrapping the SQL agent (see main.py for the CLI equivalent)."""
+"""Flask API and static host for the SQL agent (see main.py for the CLI equivalent)."""
 
-from flask import Flask, jsonify, request
-from flask_cors import CORS
+import logging
 
+from flask import Flask, jsonify, request, send_from_directory
+
+from config import FLASK_DEBUG, MAX_HISTORY_MESSAGES, PORT, PROJECT_ROOT
 from llm_client import LLMClient
 from mcp_client import call_tool, is_toolbox_reachable
 
-app = Flask(__name__)
-CORS(app)
+# Anchored to the project root: a relative path would follow the working
+# directory app.py was launched from, and crash outright where it isn't writable.
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    handlers=[
+        logging.FileHandler(PROJECT_ROOT / "agent.log", encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
+)
+log = logging.getLogger("sql-agent")
 
+# chat.html is served from here, so the UI is same-origin: no CORS, no hardcoded API host.
+app = Flask(__name__, static_folder=None)
 client = LLMClient()
 
 
 def ask(question: str, history: list[dict]) -> tuple[str, str | None]:
-    """Run the agent's tool-calling loop, capturing the last SQL statement it executed."""
+    """Run the agent's tool-calling loop, capturing the last SQL it actually executed."""
     executed_sql: list[str] = []
 
     def tracking_executor(name: str, arguments: dict):
-        if name == "execute-sql":
+        result = call_tool(name, arguments)
+        if name == "execute-sql":  # recorded only once the call has succeeded
             executed_sql.append(arguments.get("sql", ""))
-        return call_tool(name, arguments)
+        return result
 
-    messages = history + [{"role": "user", "content": question}]
+    messages = history[-MAX_HISTORY_MESSAGES:] + [{"role": "user", "content": question}]
     answer = client.run_with_tools(messages, tool_executor=tracking_executor)
     return answer, (executed_sql[-1] if executed_sql else None)
+
+
+@app.get("/")
+def index():
+    return send_from_directory(app.root_path, "chat.html")
 
 
 @app.post("/ask")
@@ -40,9 +59,12 @@ def ask_endpoint():
 
     try:
         answer, sql = ask(question, history)
-        return jsonify(answer=answer, sql=sql, error=None)
     except Exception as exc:
-        return jsonify(answer=None, sql=None, error=str(exc)), 500
+        log.exception("ask failed: %r", question)
+        return jsonify(answer=None, sql=None, error=f"{type(exc).__name__}: {exc}"), 500
+
+    log.info("ask ok: question=%r sql=%r", question, sql)
+    return jsonify(answer=answer, sql=sql, error=None)
 
 
 @app.get("/health")
@@ -53,4 +75,4 @@ def health_endpoint():
 
 
 if __name__ == "__main__":
-    app.run(port=8000, debug=True)
+    app.run(port=PORT, debug=FLASK_DEBUG)

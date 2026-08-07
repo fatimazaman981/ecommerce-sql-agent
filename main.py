@@ -1,6 +1,6 @@
 """CLI entry point for the SQL agent."""
 
-import sys
+import sys # help to interact with command line
 
 from llm_client import LLMClient
 from mcp_client import TOOLBOX_URL, is_toolbox_reachable
@@ -11,7 +11,7 @@ def check_toolbox() -> None:
     if not is_toolbox_reachable():
         sys.exit(
             f"Could not reach the MCP toolbox at {TOOLBOX_URL}.\n"
-            "Start it first with: ./toolbox.exe --config=toolBox/tools.yaml serve --port=5000"
+            "Start it first with: ./toolbox.exe --config=toolBox/tools.yaml --port=5000"
         )
 
 
@@ -21,7 +21,10 @@ def ask(client: LLMClient, question: str) -> str:
 
 def main() -> None:
     check_toolbox()
-    client = LLMClient()
+    try:
+        client = LLMClient()
+    except RuntimeError as exc:
+        sys.exit(str(exc))
 
     question = " ".join(sys.argv[1:])
     if question:
