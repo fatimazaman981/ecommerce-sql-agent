@@ -4,8 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AskMyData — Ecommerce SQL Agent</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
   :root {
     --paper: #E7E6DD;
@@ -24,9 +26,12 @@
     --radius: 10px;
   }
 
-  * { box-sizing: border-box; }
+  * {
+    box-sizing: border-box;
+  }
 
-  html, body {
+  html,
+  body {
     margin: 0;
     height: 100%;
     background: var(--paper);
@@ -92,19 +97,43 @@
     background: var(--muted);
     transition: background 0.3s;
   }
-  .status .dot.ok { background: var(--ok); box-shadow: 0 0 0 3px rgba(76,139,93,0.18); }
-  .status .dot.down { background: var(--danger); box-shadow: 0 0 0 3px rgba(180,67,46,0.18); }
+
+  .status .dot.ok {
+    background: var(--ok);
+    box-shadow: 0 0 0 3px rgba(76,139,93,0.18);
+  }
+
+  .status .dot.down {
+    background: var(--danger);
+    box-shadow: 0 0 0 3px rgba(180,67,46,0.18);
+  }
+
+  /* ---------- SQL Toggle ---------- */
 
   .sql-toggle {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 18px;
+    line-height: 1;
     background: var(--ink);
     color: var(--paper);
     border: none;
     border-radius: 6px;
-    padding: 6px 10px;
     cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .sql-toggle:hover {
+    opacity: 0.85;
+  }
+
+  .sql-toggle:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
   }
 
   /* ---------- Banner ---------- */
@@ -118,23 +147,18 @@
     border-bottom: 1px solid #E4C3B8;
     flex-shrink: 0;
   }
-  .banner.show { display: block; }
 
-  /* ---------- Main split ---------- */
+  .banner.show {
+    display: block;
+  }
+
+  /* ---------- Main ---------- */
 
   main {
     flex: 1;
     display: grid;
-    grid-template-columns: 1.15fr 1fr;
+    grid-template-columns: 1fr;
     min-height: 0;
-  }
-
-  @media (max-width: 860px) {
-    main { grid-template-columns: 1fr; }
-    .console-pane { display: none; }
-    .console-pane.show { display: flex; }
-    .chat-pane.hide { display: none; }
-    .sql-toggle { display: inline-block; }
   }
 
   /* ---------- Chat pane ---------- */
@@ -144,6 +168,10 @@
     flex-direction: column;
     min-height: 0;
     background: var(--paper);
+  }
+
+  .chat-pane.hide {
+    display: none;
   }
 
   .messages {
@@ -163,6 +191,7 @@
     font-size: 14px;
     line-height: 1.6;
   }
+
   .empty-state strong {
     display: block;
     font-family: 'IBM Plex Serif', serif;
@@ -174,8 +203,14 @@
   .bubble-row {
     display: flex;
   }
-  .bubble-row.user { justify-content: flex-end; }
-  .bubble-row.assistant { justify-content: flex-start; }
+
+  .bubble-row.user {
+    justify-content: flex-end;
+  }
+
+  .bubble-row.assistant {
+    justify-content: flex-start;
+  }
 
   .bubble {
     max-width: 72%;
@@ -212,16 +247,33 @@
     gap: 5px;
     align-items: center;
   }
+
   .bubble.thinking .dot {
-    width: 5px; height: 5px; border-radius: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
     background: var(--muted);
     animation: pulse 1.2s infinite ease-in-out;
   }
-  .bubble.thinking .dot:nth-child(2) { animation-delay: 0.15s; }
-  .bubble.thinking .dot:nth-child(3) { animation-delay: 0.3s; }
+
+  .bubble.thinking .dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  .bubble.thinking .dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
   @keyframes pulse {
-    0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
-    40% { opacity: 1; transform: scale(1); }
+    0%, 80%, 100% {
+      opacity: 0.25;
+      transform: scale(0.85);
+    }
+
+    40% {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   /* ---------- Input bar ---------- */
@@ -245,11 +297,15 @@
     background: white;
     color: var(--ink);
   }
+
   .input-bar input:focus {
     outline: 2px solid var(--signal);
     outline-offset: 1px;
   }
-  .input-bar input:disabled { color: var(--muted); }
+
+  .input-bar input:disabled {
+    color: var(--muted);
+  }
 
   .input-bar button {
     font-family: 'IBM Plex Sans', sans-serif;
@@ -263,23 +319,29 @@
     cursor: pointer;
     transition: opacity 0.15s;
   }
+
   .input-bar button:disabled {
     opacity: 0.45;
     cursor: not-allowed;
   }
+
   .input-bar button:focus-visible {
     outline: 2px solid var(--ink);
     outline-offset: 2px;
   }
 
-  /* ---------- Console pane (SQL log) ---------- */
+  /* ---------- Console pane ---------- */
 
   .console-pane {
-    display: flex;
+    display: none;
     flex-direction: column;
     min-height: 0;
     background: var(--console);
     border-left: 1px solid #050B09;
+  }
+
+  .console-pane.show {
+    display: flex;
   }
 
   .console-head {
@@ -315,9 +377,17 @@
   .entry {
     animation: print 0.35s ease-out;
   }
+
   @keyframes print {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .entry .prompt {
@@ -350,11 +420,33 @@
     font-style: italic;
   }
 
+  @media (max-width: 860px) {
+    main {
+      grid-template-columns: 1fr;
+    }
+
+    .console-pane {
+      display: none;
+    }
+
+    .console-pane.show {
+      display: flex;
+    }
+
+    .chat-pane.hide {
+      display: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .entry, .bubble.thinking .dot { animation: none; }
+    .entry,
+    .bubble.thinking .dot {
+      animation: none;
+    }
   }
 </style>
 </head>
+
 <body>
 
 <header>
@@ -362,8 +454,16 @@
     <h1>AskMyData</h1>
     <span class="tag">Ecommerce SQL Agent</span>
   </div>
+
   <div style="display:flex; align-items:center; gap:12px;">
-    <button class="sql-toggle" id="sqlToggle" type="button">View SQL</button>
+    <button
+      class="sql-toggle"
+      id="sqlToggle"
+      type="button"
+      aria-label="Show SQL panel"
+      title="Show SQL"
+    >↔</button>
+
     <div class="status">
       <span class="dot" id="statusDot"></span>
       <span id="statusText">Checking backend…</span>
@@ -376,14 +476,19 @@
 </div>
 
 <main>
+
   <section class="chat-pane" id="chatPane">
     <div class="messages" id="messages">
+
       <div class="empty-state" id="emptyState">
         <strong>Ask your store's database anything.</strong>
-        Plain English in, real SQL out — every answer is backed by a query you can inspect on the right.
+        Plain English in, real SQL out — ask questions about your store's data.
       </div>
+
     </div>
+
     <form class="input-bar" id="form">
+
       <input
         type="text"
         id="question"
@@ -391,31 +496,51 @@
         autocomplete="off"
         disabled
       />
-      <button type="submit" id="sendBtn" disabled>Ask</button>
+
+      <button type="submit" id="sendBtn" disabled>
+        Ask
+      </button>
+
     </form>
   </section>
 
   <section class="console-pane" id="consolePane">
-    <div class="console-head">Query log</div>
-    <div class="console-log" id="consoleLog">
-      <div class="console-empty" id="consoleEmpty">No queries yet.<br>Ask a question and the SQL will print here.</div>
+
+    <div class="console-head">
+      Query log
     </div>
+
+    <div class="console-log" id="consoleLog">
+
+      <div class="console-empty" id="consoleEmpty">
+        No queries yet.<br>
+        Ask a question and the SQL will print here.
+      </div>
+
+    </div>
+
   </section>
+
 </main>
 
 <script>
+
   const API_BASE = ''; // served by app.py, so the API is same-origin
 
   const messagesEl = document.getElementById('messages');
   const emptyStateEl = document.getElementById('emptyState');
+
   const consoleLogEl = document.getElementById('consoleLog');
   const consoleEmptyEl = document.getElementById('consoleEmpty');
+
   const form = document.getElementById('form');
   const questionInput = document.getElementById('question');
   const sendBtn = document.getElementById('sendBtn');
+
   const statusDot = document.getElementById('statusDot');
   const statusText = document.getElementById('statusText');
   const banner = document.getElementById('banner');
+
   const sqlToggle = document.getElementById('sqlToggle');
   const chatPane = document.getElementById('chatPane');
   const consolePane = document.getElementById('consolePane');
@@ -424,116 +549,293 @@
   let backendUp = false;
 
   function setBackendState(up) {
+
     backendUp = up;
+
     statusDot.className = 'dot ' + (up ? 'ok' : 'down');
-    statusText.textContent = up ? 'Backend connected' : 'Backend unreachable';
+
+    statusText.textContent =
+      up ? 'Backend connected' : 'Backend unreachable';
+
     banner.classList.toggle('show', !up);
+
     questionInput.disabled = !up;
     sendBtn.disabled = !up;
   }
 
+
   async function checkHealth() {
+
     try {
-      const res = await fetch(API_BASE + '/health', { signal: AbortSignal.timeout(3000) });
+
+      const res = await fetch(
+        API_BASE + '/health',
+        {
+          signal: AbortSignal.timeout(3000)
+        }
+      );
+
       setBackendState(res.ok);
+
     } catch {
+
       setBackendState(false);
+
     }
   }
 
+
   function addBubble(role, text, isError) {
+
     emptyStateEl.style.display = 'none';
+
     const row = document.createElement('div');
-    row.className = 'bubble-row ' + role;
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble' + (isError ? ' error' : '');
+
+    row.className =
+      'bubble-row ' + role;
+
+    const bubble =
+      document.createElement('div');
+
+    bubble.className =
+      'bubble' + (isError ? ' error' : '');
+
     bubble.textContent = text;
+
     row.appendChild(bubble);
+
     messagesEl.appendChild(row);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    messagesEl.scrollTop =
+      messagesEl.scrollHeight;
+
     return bubble;
   }
 
+
   function addThinkingBubble() {
+
     emptyStateEl.style.display = 'none';
-    const row = document.createElement('div');
-    row.className = 'bubble-row assistant';
-    row.innerHTML = '<div class="bubble thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+
+    const row =
+      document.createElement('div');
+
+    row.className =
+      'bubble-row assistant';
+
+    row.innerHTML =
+      '<div class="bubble thinking">' +
+        '<span class="dot"></span>' +
+        '<span class="dot"></span>' +
+        '<span class="dot"></span>' +
+      '</div>';
+
     messagesEl.appendChild(row);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    messagesEl.scrollTop =
+      messagesEl.scrollHeight;
+
     return row;
   }
 
+
   function addConsoleEntry(question, sql) {
+
     consoleEmptyEl.style.display = 'none';
-    const entry = document.createElement('div');
+
+    const entry =
+      document.createElement('div');
+
     entry.className = 'entry';
-    const label = document.createElement('div');
+
+    const label =
+      document.createElement('div');
+
     label.className = 'prompt';
-    label.textContent = question.length > 60 ? question.slice(0, 60) + '…' : question;
+
+    label.textContent =
+      question.length > 60
+        ? question.slice(0, 60) + '…'
+        : question;
+
     entry.appendChild(label);
+
     if (sql) {
-      const pre = document.createElement('pre');
+
+      const pre =
+        document.createElement('pre');
+
       pre.textContent = sql;
+
       entry.appendChild(pre);
+
     } else {
-      const none = document.createElement('div');
+
+      const none =
+        document.createElement('div');
+
       none.className = 'no-query';
-      none.textContent = 'answered without a database query';
+
+      none.textContent =
+        'answered without a database query';
+
       entry.appendChild(none);
     }
+
     consoleLogEl.appendChild(entry);
-    consoleLogEl.scrollTop = consoleLogEl.scrollHeight;
+
+    consoleLogEl.scrollTop =
+      consoleLogEl.scrollHeight;
   }
 
+
   form.addEventListener('submit', async (e) => {
+
     e.preventDefault();
-    const question = questionInput.value.trim();
-    if (!question || !backendUp) return;
+
+    const question =
+      questionInput.value.trim();
+
+    if (!question || !backendUp) {
+      return;
+    }
 
     questionInput.value = '';
+
     questionInput.disabled = true;
     sendBtn.disabled = true;
 
     addBubble('user', question);
-    const thinkingRow = addThinkingBubble();
+
+    const thinkingRow =
+      addThinkingBubble();
+
 
     try {
-      const res = await fetch(API_BASE + '/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, history }),
-      });
-      const data = await res.json();
+
+      const res =
+        await fetch(
+          API_BASE + '/ask',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              question,
+              history
+            })
+          }
+        );
+
+
+      const data =
+        await res.json();
+
       thinkingRow.remove();
+
 
       if (data.error) {
-        addBubble('assistant', data.error, true);
+
+        addBubble(
+          'assistant',
+          data.error,
+          true
+        );
+
       } else {
-        addBubble('assistant', data.answer);
-        addConsoleEntry(question, data.sql);
-        history.push({ role: 'user', content: question });
-        history.push({ role: 'assistant', content: data.answer });
+
+        addBubble(
+          'assistant',
+          data.answer
+        );
+
+        /*
+         * SQL is still received from the backend,
+         * but it is NOT shown in the normal chat.
+         *
+         * It is stored in the hidden Query Log.
+         * Click ↔ to view it.
+         */
+        addConsoleEntry(
+          question,
+          data.sql
+        );
+
+        history.push({
+          role: 'user',
+          content: question
+        });
+
+        history.push({
+          role: 'assistant',
+          content: data.answer
+        });
       }
+
     } catch (err) {
+
       thinkingRow.remove();
-      addBubble('assistant', 'Could not reach the backend: ' + err.message, true);
+
+      addBubble(
+        'assistant',
+        'Could not reach the backend: ' +
+        err.message,
+        true
+      );
+
       checkHealth();
+
     } finally {
-      questionInput.disabled = !backendUp;
-      sendBtn.disabled = !backendUp;
+
+      questionInput.disabled =
+        !backendUp;
+
+      sendBtn.disabled =
+        !backendUp;
+
       questionInput.focus();
     }
+
   });
+
+
+  /* ---------- SQL panel toggle ---------- */
 
   sqlToggle.addEventListener('click', () => {
-    const showingSql = consolePane.classList.toggle('show');
-    chatPane.classList.toggle('hide', showingSql);
-    sqlToggle.textContent = showingSql ? 'View chat' : 'View SQL';
+
+    const showingSql =
+      consolePane.classList.toggle('show');
+
+    chatPane.classList.toggle(
+      'hide',
+      showingSql
+    );
+
+    sqlToggle.setAttribute(
+      'aria-label',
+      showingSql
+        ? 'Hide SQL panel'
+        : 'Show SQL panel'
+    );
+
+    sqlToggle.setAttribute(
+      'title',
+      showingSql
+        ? 'Back to chat'
+        : 'Show SQL'
+    );
+
   });
 
+
   checkHealth();
-  setInterval(checkHealth, 15000);
+
+  setInterval(
+    checkHealth,
+    15000
+  );
+
 </script>
 
 </body>
